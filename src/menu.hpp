@@ -26,8 +26,15 @@ public:
     void AddToggle(const std::string& label, bool* state);
     void AddSubmenu(const std::string& label, std::shared_ptr<Menu> submenu);
 
+    std::shared_ptr<Menu> AddFolder(const std::string& label);
+    std::shared_ptr<Menu> AddFolder(const std::string& label,
+        const std::function<void(std::shared_ptr<Menu>)>& build);
+
     void Render();
     void Up();
     void Down();
     std::shared_ptr<Menu> Select();
+
+    MenuItemType CurrentType() const;
+    std::shared_ptr<Menu> CurrentSubmenu() const;
 };
