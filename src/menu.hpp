@@ -19,6 +19,7 @@ struct MenuItem {
     bool* toggleState = nullptr;
     std::shared_ptr<class Menu> submenu = nullptr;
 
+    // For number options
     int* intValue = nullptr;
     float* floatValue = nullptr;
     int minInt = 0;
@@ -36,8 +37,9 @@ private:
     std::vector<MenuItem> items;
     int selected = 0;
     int scrollOffset = 0;
-    int maxDisplay = 12;
+    int maxDisplay = 12; // Max visible items
 
+    // Visual settings - Terror/Elegance style
     struct MenuStyle {
         float x;
         float y;
@@ -46,6 +48,7 @@ private:
         float itemHeight;
         float footerHeight;
 
+        // Colors (grayscale theme)
         struct Color { int r; int g; int b; int a; };
         Color background;
         Color header;
@@ -77,6 +80,7 @@ private:
         }
     } style;
 
+    // Animation
     float openAnimation = 0.0f;
     bool isOpening = false;
 
@@ -96,10 +100,12 @@ public:
     void AddNumber(const std::string& label, int* value, int min, int max, int step = 1);
     void AddNumber(const std::string& label, float* value, float min, float max, float step = 0.1f);
 
+    // Helpers
     std::shared_ptr<Menu> AddFolder(const std::string& label);
     std::shared_ptr<Menu> AddFolder(const std::string& label,
         const std::function<void(std::shared_ptr<Menu>)>& build);
 
+    // Core functions
     void Render();
     void Up();
     void Down();
@@ -107,10 +113,16 @@ public:
     void Right();
     std::shared_ptr<Menu> Select();
 
+    // Getters
     MenuItemType CurrentType() const;
     std::shared_ptr<Menu> CurrentSubmenu() const;
 
-    void StartOpenAnimation() { isOpening = true; openAnimation = 0.0f; }
+    void StartOpenAnimation() {
+        isOpening = true;
+        openAnimation = 0.0f;
+    }
     void Open() { StartOpenAnimation(); }
-    void Close() { isOpening = false; }
+    void Close() {
+        isOpening = false;
+    }
 };

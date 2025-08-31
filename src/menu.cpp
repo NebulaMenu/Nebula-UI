@@ -12,6 +12,10 @@
 #undef max
 #endif
 
+//static void PlayMenuSound(const char* soundName, const char* soundSet) {
+//    AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)soundName, (char*)soundSet, false);
+//}
+
 void Menu::AddAction(const std::string& label, std::function<void()> action) {
     items.push_back({ label, MenuItemType::Action, action });
 }
@@ -190,7 +194,7 @@ void Menu::DrawFooter() {
     UI::SET_TEXT_COLOUR(200, 200, 200, 255);
     UI::SET_TEXT_CENTRE(true);
     UI::_SET_TEXT_ENTRY((char*)"STRING");
-    UI::_ADD_TEXT_COMPONENT_STRING((char*)"Navigate: ~c~↑ ↓~s~    Select: ~c~Enter~s~    Back: ~c~Backspace");
+    UI::_ADD_TEXT_COMPONENT_STRING((char*)"Navigate: ~c~UP / DOWN~s~    Select: ~c~Enter~s~    Back: ~c~Backspace");
     UI::_DRAW_TEXT(x, footerY + 0.008f);
 }
 
