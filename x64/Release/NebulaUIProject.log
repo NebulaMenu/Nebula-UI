@@ -1,3 +1,5 @@
 ﻿  draw.cpp
   menu.cpp
+E:\Dev\skid\Nebula-Project\Nebula-UI\src\menu.cpp(203,43): warning C4566: un carattere rappresentato dal nome di caratteri universali '\u2191' non può essere rappresentato nella tabella codici corrente (1252)
+E:\Dev\skid\Nebula-Project\Nebula-UI\src\menu.cpp(203,43): warning C4566: un carattere rappresentato dal nome di caratteri universali '\u2193' non può essere rappresentato nella tabella codici corrente (1252)
   NebulaUIProject.vcxproj -> E:\Dev\skid\Nebula-Project\x64\Release\Nebula-UI.lib
