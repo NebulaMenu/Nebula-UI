@@ -1,4 +1,5 @@
-﻿#include "menu.hpp"
+﻿// menu.cpp
+#include "menu.hpp"
 #include "draw.hpp"
 #include "script.h"
 #include <iomanip>
@@ -79,6 +80,7 @@ Menu::MenuStyle::MenuStyle() {
     headerHeight = 0.08f;
     itemHeight = 0.035f;
     footerHeight = 0.030f;
+    listTopGap = 0.010f;
 
     background = { 10, 10, 10, 230 };
     header = { 15, 15, 15, 255 };
@@ -102,7 +104,6 @@ int Menu::selectableCount() const {
 int Menu::findNextSelectable(int from, int step) const {
     if (items.empty()) return -1;
     if (selectableCount() == 0) return -1;
-
     int idx = from;
     for (int i = 0; i < (int)items.size(); ++i) {
         idx = (idx + step + (int)items.size()) % (int)items.size();
@@ -143,6 +144,7 @@ void Menu::DrawHeader() {
     UI::_ADD_TEXT_COMPONENT_STRING(counter);
     UI::_DRAW_TEXT(x + style.width / 2 - 0.005f, y + style.headerHeight / 2 - 0.025f);
 }
+
 void Menu::DrawSelection() {
     if (items.empty()) return;
     if (!isSelectable(items[selected])) return;
@@ -151,14 +153,15 @@ void Menu::DrawSelection() {
     if (visibleIndex < 0 || visibleIndex >= maxDisplay) return;
 
     float x = style.x;
-    float y = style.y + style.headerHeight / 2 + 0.002f + visibleIndex * style.itemHeight;
+    float y = style.y + style.headerHeight / 2 + style.listTopGap + visibleIndex * style.itemHeight;
 
     DrawRect(x, y + style.itemHeight / 2, style.width, style.itemHeight,
         style.selection.r, style.selection.g, style.selection.b, style.selection.a);
 }
+
 void Menu::DrawItems() {
     float x = style.x;
-    float startY = style.y + style.headerHeight / 2 + 0.002f;
+    float startY = style.y + style.headerHeight / 2 + style.listTopGap;
 
     int endItem = std::min(scrollOffset + maxDisplay, (int)items.size());
 
@@ -175,16 +178,13 @@ void Menu::DrawItems() {
         int ta = isSelectedRow ? style.selectedText.a : style.text.a;
 
         if (item.type == MenuItemType::Separator) {
-            DrawRect(x, itemY + style.itemHeight / 2, style.width, 0.0018f, 255, 255, 255, 45);
-            if (!item.label.empty()) {
-                UI::SET_TEXT_FONT(4);
-                UI::SET_TEXT_SCALE(0.32f, 0.32f);
-                UI::SET_TEXT_COLOUR(style.disabledText.r, style.disabledText.g, style.disabledText.b, style.disabledText.a);
-                UI::SET_TEXT_CENTRE(true);
-                UI::_SET_TEXT_ENTRY((char*)"STRING");
-                UI::_ADD_TEXT_COMPONENT_STRING(const_cast<char*>(item.label.c_str()));
-                UI::_DRAW_TEXT(x, itemY - 0.012f);
-            }
+            UI::SET_TEXT_FONT(4);
+            UI::SET_TEXT_SCALE(0.33f, 0.33f);
+            UI::SET_TEXT_COLOUR(style.disabledText.r, style.disabledText.g, style.disabledText.b, style.disabledText.a);
+            UI::SET_TEXT_CENTRE(true);
+            UI::_SET_TEXT_ENTRY((char*)"STRING");
+            UI::_ADD_TEXT_COMPONENT_STRING(const_cast<char*>(item.label.c_str()));
+            UI::_DRAW_TEXT(x, itemY + style.itemHeight * 0.35f);
             continue;
         }
         if (item.type == MenuItemType::TextOption) {
@@ -209,13 +209,12 @@ void Menu::DrawItems() {
         float rightX = x + style.width / 2 - 0.005f;
 
         switch (item.type) {
-        case MenuItemType::Toggle:
+        case MenuItemType::Toggle: {
             if (item.toggleState) {
                 const char* state = *item.toggleState ? "ON" : "OFF";
                 int sr = *item.toggleState ? style.toggleOn.r : style.toggleOff.r;
                 int sg = *item.toggleState ? style.toggleOn.g : style.toggleOff.g;
                 int sb = *item.toggleState ? style.toggleOn.b : style.toggleOff.b;
-
                 UI::SET_TEXT_FONT(4);
                 UI::SET_TEXT_SCALE(0.35f, 0.35f);
                 UI::SET_TEXT_COLOUR(sr, sg, sb, 255);
@@ -226,8 +225,8 @@ void Menu::DrawItems() {
                 UI::_DRAW_TEXT(rightX, itemY);
             }
             break;
-
-        case MenuItemType::Submenu:
+        }
+        case MenuItemType::Submenu: {
             UI::SET_TEXT_FONT(4);
             UI::SET_TEXT_SCALE(0.35f, 0.35f);
             UI::SET_TEXT_COLOUR(tr, tg, tb, ta);
@@ -237,14 +236,12 @@ void Menu::DrawItems() {
             UI::_ADD_TEXT_COMPONENT_STRING((char*)">");
             UI::_DRAW_TEXT(rightX, itemY);
             break;
-
-        case MenuItemType::NumberOption:
-        {
+        }
+        case MenuItemType::NumberOption: {
             std::stringstream ss;
             if (item.isFloat && item.floatValue) ss << std::fixed << std::setprecision(1) << *item.floatValue;
             else if (item.intValue)             ss << *item.intValue;
             std::string valueStr = "< " + ss.str() + " >";
-
             UI::SET_TEXT_FONT(4);
             UI::SET_TEXT_SCALE(0.35f, 0.35f);
             UI::SET_TEXT_COLOUR(tr, tg, tb, ta);
@@ -253,16 +250,17 @@ void Menu::DrawItems() {
             UI::_SET_TEXT_ENTRY((char*)"STRING");
             UI::_ADD_TEXT_COMPONENT_STRING(const_cast<char*>(valueStr.c_str()));
             UI::_DRAW_TEXT(rightX, itemY);
-        } break;
-
+            break;
+        }
         default:
             break;
         }
     }
 }
+
 void Menu::DrawFooter() {
     float x = style.x;
-    float footerY = style.y + style.headerHeight / 2 + 0.002f + maxDisplay * style.itemHeight;
+    float footerY = style.y + style.headerHeight / 2 + style.listTopGap + maxDisplay * style.itemHeight;
 
     DrawRect(x, footerY + style.footerHeight / 2, style.width, style.footerHeight,
         style.footer.r, style.footer.g, style.footer.b, style.footer.a);
@@ -275,11 +273,12 @@ void Menu::DrawFooter() {
     UI::_ADD_TEXT_COMPONENT_STRING((char*)"Navigate: ~c~UP/DOWN~s~  Select: ~c~Enter~s~  Back: ~c~Backspace");
     UI::_DRAW_TEXT(x, footerY + 0.008f);
 }
+
 void Menu::DrawScrollIndicator() {
     if (items.size() <= maxDisplay) return;
 
     float x = style.x + style.width / 2 + 0.005f;
-    float startY = style.y + style.headerHeight / 2 + 0.002f;
+    float startY = style.y + style.headerHeight / 2 + style.listTopGap;
     float scrollHeight = maxDisplay * style.itemHeight;
 
     DrawRect(x, startY + scrollHeight / 2, 0.002f, scrollHeight, 40, 40, 40, 160);
@@ -290,8 +289,9 @@ void Menu::DrawScrollIndicator() {
 
     DrawRect(x, thumbY, 0.003f, thumbHeight, 255, 255, 255, 200);
 }
+
 void Menu::Render() {
-    float bgY = style.y + style.headerHeight / 2 + 0.002f + (maxDisplay * style.itemHeight) / 2;
+    float bgY = style.y + style.headerHeight / 2 + style.listTopGap + (maxDisplay * style.itemHeight) / 2;
     float bgHeight = maxDisplay * style.itemHeight;
 
     DrawRect(style.x, bgY, style.width, bgHeight,
@@ -304,26 +304,51 @@ void Menu::Render() {
     DrawScrollIndicator();
 }
 
+void Menu::AdjustScrollForTop() {
+    if (scrollOffset <= 0 || items.empty()) return;
+    if (selected < 2) { scrollOffset = 0; return; }
+    int prev = scrollOffset - 1;
+    if (prev >= 0 && items[prev].type == MenuItemType::Separator) {
+        scrollOffset = prev;
+    }
+}
+
 void Menu::Up() {
     if (items.empty() || selectableCount() == 0) return;
     int next = findNextSelectable(selected, -1);
-    if (next >= 0 && next != selected) {
-        selected = next;
-        if (selected < scrollOffset) scrollOffset = selected;
-        PlayMenuSound("NAV_UP_DOWN");
+    if (next < 0 || next == selected) return;
+
+    selected = next;
+
+    if (selected < scrollOffset) {
+        scrollOffset = selected;
     }
+    else if (selected >= scrollOffset + maxDisplay) {
+        scrollOffset = std::max(0, selected - maxDisplay + 1);
+    }
+
+    AdjustScrollForTop();
+    PlayMenuSound("NAV_UP_DOWN");
 }
+
 void Menu::Down() {
     if (items.empty() || selectableCount() == 0) return;
     int next = findNextSelectable(selected, +1);
-    if (next >= 0 && next != selected) {
-        selected = next;
-        if (selected >= scrollOffset + maxDisplay) {
-            scrollOffset = selected - maxDisplay + 1;
-        }
-        PlayMenuSound("NAV_UP_DOWN");
+    if (next < 0 || next == selected) return;
+
+    selected = next;
+
+    if (selected < scrollOffset) {
+        scrollOffset = selected;
     }
+    else if (selected >= scrollOffset + maxDisplay) {
+        scrollOffset = std::max(0, selected - maxDisplay + 1);
+    }
+
+    AdjustScrollForTop();
+    PlayMenuSound("NAV_UP_DOWN");
 }
+
 void Menu::Left() {
     if (items.empty()) return;
     auto& item = items[selected];
@@ -404,4 +429,5 @@ void Menu::Open() {
         selected = 0;
         scrollOffset = 0;
     }
+    AdjustScrollForTop();
 }

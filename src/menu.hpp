@@ -1,3 +1,4 @@
+// menu.hpp
 #pragma once
 #include <string>
 #include <vector>
@@ -41,6 +42,7 @@ private:
 
     struct MenuStyle {
         float x, y, width, headerHeight, itemHeight, footerHeight;
+        float listTopGap;
         struct Color { int r; int g; int b; int a; };
         Color background, header, footer, selection, text, selectedText, disabledText, toggleOn, toggleOff;
         MenuStyle();
@@ -59,6 +61,8 @@ private:
     int  findNextSelectable(int from, int step) const;
     int  selectableCount() const;
     int  indexInSelectableList(int absoluteIndex) const;
+
+    void AdjustScrollForTop();
 
 public:
     Menu(const std::string& t) : title(t) {}
